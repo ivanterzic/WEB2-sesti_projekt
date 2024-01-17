@@ -29,7 +29,12 @@ export default {
   created() {
     const store = useStore()
     store.fetchCities()
+  },
+  mounted() {
+    const store = useStore()
+    store.fetchCities()
   }
+  
 }
 </script>
 

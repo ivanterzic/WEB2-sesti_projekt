@@ -1,13 +1,13 @@
 <template>
-  <div class="game-container">
+  <div class="game-container" v-if="citiesLoaded">
     <p>Score: {{ score }}</p>
     <p>Time left: {{ formattedTimeLeft }}</p>
     <div>
       <div>
-        Previous: {{ currentCity.name }} - Population: {{ currentCity.population }}
+        Previous: {{ currentCity?.name }} - Population: {{ currentCity?.population }}
       </div>
       <div>
-        Current: {{ nextCity.name }} <span v-if="hasGuessed && !isCorrect">- Population: {{ nextCity.population }}</span>
+        Current: {{ nextCity?.name }} <span v-if="hasGuessed && !isCorrect">- Population: {{ nextCity?.population }}</span>
       </div>
     </div>
     <div>
@@ -38,30 +38,25 @@
         </div>
       </div>
       </div>
-    </div>
+    </div>    
 </template>
 
 <script>
 import { useStore } from '../store'
 export default {
-  setup() {
-    const store = useStore()
-    store.fetchCities()
-    return {
-      cities: store.cities
-    }
-  },
+  
   data() {
     return {
-      currentCity: null,
-      nextCity: null,
+      currentCity: undefined,
+      nextCity: undefined,
       hasGuessed: false,
       isCorrect: true,
       score: 0,
       timeLeft: 20,
       playerName: '',
       playerNamePushed: false,
-      topPlayers: JSON.parse(localStorage.getItem('topPlayers')) || []
+      topPlayers: JSON.parse(localStorage.getItem('topPlayers')) || [],
+      citiesLoaded: false,  
     };
   },
   computed: {
@@ -76,15 +71,20 @@ export default {
       const seconds = this.timeLeft % 60;
       return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
     },
+    cities() {
+      const store = useStore()
+      return store.cities
+    },
   },
   methods: {
     startGame() {
       this.hasGuessed = false;
       this.isCorrect = true;
       this.score = 0;
-      this.timeLeft = 20;
       this.currentCity = this.cities[Math.floor(Math.random() * this.cities.length)];
       this.nextCity = this.cities[Math.floor(Math.random() * this.cities.length)];
+      this.citiesLoaded = true;
+      this.timeLeft = 20;
       this.timer = setInterval(() => {
         if (this.timeLeft > 0) {
           this.timeLeft--;
@@ -92,6 +92,7 @@ export default {
           this.endGame();
         }
       }, 1000);
+      
       this.playerNamePushed = false;
     },
     guess(direction) {
@@ -129,9 +130,11 @@ export default {
 
     }
   },
-  created() {
+  async created() {
+    const store = useStore()
+    await store.fetchCities()
     this.startGame();
-  }
+  },
 }
 </script>
 
