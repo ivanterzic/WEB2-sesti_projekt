@@ -10,7 +10,7 @@
 </template>
 
 <script>
-import { useStore } from './store'
+import { useStore } from './stores/store'
 import AppHeader from './components/AppHeader.vue'
 
 export default {

@@ -1,9 +1,124 @@
 <template>
-  <div class="game-container">
-    <button class="game-button red">Previous <span class="arrow">&#8592;</span></button>
-    <button class="game-button green">Next <span class="arrow">&#8594;</span></button>
-  </div>
+  <div class="game-container" v-if="citiesLoaded">
+    <p>Score: {{ score }}</p>
+    <div>
+      <div>
+        Previous: {{ currentCity?.name }} - Population: {{ currentCity?.population }}
+      </div>
+      <div>
+        Current: {{ nextCity?.name }} <span v-if="hasGuessed && !isCorrect">- Population: {{ nextCity?.population }}</span>
+      </div>
+    </div>
+    <div>
+      <button class="game-button red" @click="guess('lower')" :disabled="!isCorrect">Lower</button>
+      <button class="game-button green" @click="guess('higher')" :disabled="!isCorrect">Higher</button>
+    </div>
+    
+    <div v-if="hasGuessed">
+      <div v-if="isCorrect">
+        Correct!
+      </div>
+      <div v-else>
+        Incorrect! 
+        <hr>
+        Game Over. High Score: {{ highScore }} set by player {{ highScorePlayer }}
+        <br>
+        <input v-model="playerName" placeholder="Enter your name" />
+        <button class="game-button reset" @click="pushScore" :disabled="playerName === '' || playerNamePushed">Confirm</button>
+        <br>
+        <button class="game-button reset" @click="startGame">Play Again</button>
+        <div>
+          <h2>Top 10 Players</h2>
+          <ol>
+            <li v-for="(player, index) in topPlayers" :key="index">
+              {{ player.name }} - {{ player.score }}
+            </li>
+          </ol>
+        </div>
+      </div>
+      </div>
+    </div>    
 </template>
+
+<script>
+import { useStore } from '../stores/store'
+export default {
+  
+  data() {
+    return {
+      currentCity: undefined,
+      nextCity: undefined,
+      hasGuessed: false,
+      isCorrect: true,
+      score: 0,
+      playerName: '',
+      playerNamePushed: false,
+      topPlayers: JSON.parse(localStorage.getItem('untimedTopPlayers')) || [],
+      citiesLoaded: false,  
+    };
+  },
+  computed: {
+    highScore() {
+      return this.topPlayers[0]?.score || 0;
+    },
+    highScorePlayer() {
+      return this.topPlayers[0]?.name || '';
+    },
+    cities() {
+      const store = useStore()
+      return store.cities
+    },
+  },
+  methods: {
+    startGame() {
+      this.hasGuessed = false;
+      this.isCorrect = true;
+      this.score = 0;
+      this.currentCity = this.cities[Math.floor(Math.random() * this.cities.length)];
+      this.nextCity = this.cities[Math.floor(Math.random() * this.cities.length)];
+      this.citiesLoaded = true;
+    },
+    guess(direction) {
+      if (!this.hasGuessed) this.hasGuessed = true;
+      if ((direction === 'higher' && this.nextCity.population >= this.currentCity.population) ||
+          (direction === 'lower' && this.nextCity.population <= this.currentCity.population)) {
+        this.isCorrect = true;
+        this.score++;
+      } else {
+        this.isCorrect = false;
+        this.endGame();
+        return;
+      }
+      this.currentCity = this.nextCity;
+      this.nextCity = this.cities[Math.floor(Math.random() * this.cities.length)];
+    },
+    endGame() {
+      const bestScore = localStorage.getItem('untimedBestScore');
+      if (!bestScore || this.score > bestScore) {
+        localStorage.setItem('untimedBestScore', this.score);
+        localStorage.setItem('untimedBestPlayer', this.playerName);
+      }
+    },
+    pushScore() {
+      const players = JSON.parse(localStorage.getItem('untimedTopPlayers')) || [];
+      players.push({ name: this.playerName, score: this.score });
+      players.sort((a, b) => b.score - a.score);
+      if (players.length > 10) {
+        players.length = 10;
+      }
+      localStorage.setItem('untimedTopPlayers', JSON.stringify(players));
+      this.topPlayers = players;
+      this.playerNamePushed = true; 
+
+    }
+  },
+  async created() {
+    const store = useStore()
+    await store.fetchCities()
+    this.startGame();
+  },
+}
+</script>
 
 <style scoped>
   .game-container {
@@ -13,7 +128,7 @@
     padding: 20px;
     border: 1px solid #897a7a;
     border-radius: 10px;
-    font-family: Georgia, 'Times New Roman', Times, serif;
+    font-family:Georgia, 'Times New Roman', Times, serif;
     font-size: 1.2rem;
     background-color: #f4f4f4;
   }
@@ -37,7 +152,12 @@
     background-color: #4caf50;
   }
 
-  .arrow {
-    margin-left: 5px;
+  .game-button.reset {
+    background-color: #2196f3;
   }
+
+  .game-button:disabled {
+    opacity: 0.3;
+  }
+
 </style>

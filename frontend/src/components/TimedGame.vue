@@ -42,7 +42,7 @@
 </template>
 
 <script>
-import { useStore } from '../store'
+import { useStore } from '../stores/store'
 export default {
   
   data() {
@@ -52,7 +52,7 @@ export default {
       hasGuessed: false,
       isCorrect: true,
       score: 0,
-      timeLeft: 20,
+      timeLeft: 10,
       playerName: '',
       playerNamePushed: false,
       topPlayers: JSON.parse(localStorage.getItem('topPlayers')) || [],
@@ -84,12 +84,12 @@ export default {
       this.currentCity = this.cities[Math.floor(Math.random() * this.cities.length)];
       this.nextCity = this.cities[Math.floor(Math.random() * this.cities.length)];
       this.citiesLoaded = true;
-      this.timeLeft = 20;
+      this.timeLeft = 10;
       this.timer = setInterval(() => {
         if (this.timeLeft > 0) {
           this.timeLeft--;
-        } else {
-          this.endGame();
+        } else { this.hasGuessed = true;
+          this.isCorrect = false; this.endGame();
         }
       }, 1000);
       

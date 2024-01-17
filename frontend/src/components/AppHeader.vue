@@ -2,20 +2,29 @@
   <header class="app-header">
     <a href="/"> <h1 class="app-title">Higher or Lower</h1></a>
     <div class="mode-buttons">
-      <button class="mode-button" @click="$emit('changeMode', 'timed')">Timed Game</button>
-      <button class="mode-button" @click="$emit('changeMode', 'untimed')">Untimed Game</button>
+      <button class="mode-button" @click="$emit('changeMode', timed)">Timed Game</button>
+      <button class="mode-button" @click="$emit('changeMode', untimed)">Untimed Game</button>
     </div>
   </header>
-  
 </template>
-  
-  <script>
-  export default {
-    name: 'AppHeader',
-  }
-  </script>
-  
-  <style scoped>
+
+<script>
+export default {
+  name: 'AppHeader',
+  props: {
+    timed: {
+      type: String,
+      default: 'timed',
+    },
+    untimed: {
+      type: String,
+      default: 'untimed',
+    },
+  },
+}
+</script>
+
+<style scoped>
     .app-header {
       display: flex;
       justify-content: space-around;
