@@ -4,10 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "frontend": "cd ../frontend && npm i && npm run build && serve -s dist",
+    "frontend": "cd ../frontend && npm run serve",
     "backend": "node server.js",
-    "serve": "npm i && concurrently --kill-others \"npm run frontend\" \"npm run backend\"",
-    "dev": "concurrently --kill-others \"npm run frontend\" \"nodemon server.js\""
+    "install": "cd ../frontend && npm install && cd ../backend && npm install",
+    "dev": "concurrently --kill-others \"npm run frontend\" \"npm run backend\"",
+    "serve": "node install && node dev"
   },
   "keywords": [],
   "author": "",
