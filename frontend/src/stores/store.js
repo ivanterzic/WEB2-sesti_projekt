@@ -8,6 +8,7 @@ export const useStore = defineStore({
   }),
   actions: {
     async fetchCities() {
+      //const response = await axios.get('http://localhost:3000/cities')
       const response = await axios.get('http://localhost:3000/cities')
       this.cities = response.data.cities.map(city => ({
         ...city,
