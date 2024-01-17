@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import axios from 'axios'
+//import axios from 'axios'
 
 export const useStore = defineStore({
   id: 'main',
@@ -20,7 +20,7 @@ export const useStore = defineStore({
         ...city,
         population: parseInt(city.population),
       }))
-      
+
     },
   },
 })
